@@ -146,10 +146,10 @@ translate([0, 0, BaseHeight]) {
      // this is the main screw
 
      // this is the nema 17
-     translate([0, 0, 38]) {
-          rotate([180, 0, 0]) {
-               nema17();
-               translate([20, 10, 0]) {
+     translate([0, 0, 42.2/2 + 35]) {
+          rotate([90, 0, 00]) {
+              // nema17();
+             /*  translate([20, 10, 0]) {
                     rotate([0, 0, 90]) {
                          color("blue") {
                               prism(10, 15, 15);
@@ -180,7 +180,7 @@ translate([0, 0, BaseHeight]) {
                          }
                     }
                }
-               
+               */
                
           }
      }
