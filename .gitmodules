@@ -1,0 +1,3 @@
+[submodule "thorgripper/nutsnbolts"]
+	path = thorgripper/nutsnbolts
+	url = https://github.com/JohK/nutsnbolts.git
