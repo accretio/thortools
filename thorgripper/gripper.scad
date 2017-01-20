@@ -12,9 +12,7 @@ use <spur_generator.scad>
 use <../../Thingiverse-Projects/Threaded Library/Thread_Library.scad>
 use <MCAD/involute_gears.scad>
 
-
 /// new version of the gripper
-
 
 GripperRadius=38;
 NemaHeight=34;
@@ -28,16 +26,16 @@ module nema() {
      }
 }
 
-module gripper() {
+module body() {
      module m3_hole(x, y) {
           color("red") {
-               translate([x*31/2, y*31/2, NemaHeight + NemaCoverHeight]) hole_through(name="M3", l=10, cl=0.1, h=2, hcl=0.4);
+               translate([x*31/2, y*31/2, NemaHeight + NemaCoverHeight +  length/2 + BearingDiameter]) hole_through(name="M3", l=(10 + length/2 + BearingDiameter), cl=0.1, h=2, hcl=0.4);
           }
      }
      difference() {
-          cylinder(NemaHeight + NemaCoverHeight, GripperRadius, GripperRadius);
+          cylinder(NemaHeight + NemaCoverHeight + length/2 + BearingDiameter, GripperRadius, GripperRadius);
           // the hole for the axe
-          cylinder(NemaHeight + NemaCoverHeight + 1, NemaHoleRadius, NemaHoleRadius);
+          cylinder(NemaHeight + NemaCoverHeight + length/2 + BearingDiameter + 1, NemaHoleRadius, NemaHoleRadius);
           // the m3 holes
           m3_hole(-1, -1);
           m3_hole(-1, 1);
@@ -51,31 +49,31 @@ module gripper() {
                     cube([50, NemaCableHoleWidth, 10]);
                }
           }
-          // the holes for the attachment
-          attachment_hole(0);
-          attachment_hole(1);
-          attachment_hole(3);
-
-          // the holes for the arm
+              
+          // the holes for the arm and the attachment screws
           translate([0, 0, -AttachmentHeight]) {
                arm_hole(0);
                arm_hole(1);
+
+               attachment_hole(30);
+               attachment_hole(-30);
+               attachment_hole(150);
+               attachment_hole(-150);
+               
           }
-        
+          // the holes for the arms with drivers
+          arm_hole_driver(0);
+          arm_hole_driver(1);
      }
 
-     translate([0, 0, NemaHeight + 10]) {
-          arm_regular(0, true);
-          arm_regular(1, true);
-     } 
-     
+   
 }
 
 
 AttachmentHeight=20;
 Arm6Radius=15.1;
 Arm6EndHeight=10;
-ArmTolerance=0.4; 
+ArmTolerance=0.5; 
 ArmLength2=40;
 // screws to the ase
 module attachment_hole(pos) {
@@ -86,7 +84,7 @@ module attachment_hole(pos) {
                          hole_through(name="M3", l=50, cl=0.1, h=5, hcl=0.4);
                     }
                     
-                    translate([0, 0, 30]) {
+                    translate([0, 0, 40]) {
                          nutcatch_sidecut("M3", l=100, clk=0.1, clh=0.1, clsl=0.1);
                     }
                }
@@ -108,46 +106,47 @@ module attachment() {
                }
           }
      }
+
+     translate([0, 0, -AttachmentHeight]) {
      
-     difference() {
-          cylinder(AttachmentHeight, GripperRadius, GripperRadius);
-          cylinder(Arm6EndHeight, Arm6Radius, Arm6Radius);
+          difference() {
+               cylinder(AttachmentHeight, GripperRadius, GripperRadius);
+               cylinder(Arm6EndHeight, Arm6Radius, Arm6Radius);
 
-          //  some locking stuff 
-          attachment_hole(30);
-          attachment_hole(-30);
+               //  some locking stuff 
+               attachment_hole(30);
+               attachment_hole(-30);
 
 
-          attachment_hole(150);
-          attachment_hole(-150);
+               attachment_hole(150);
+               attachment_hole(-150);
 
           
         
-          locking_hole(0);
-          locking_hole(1);
-          locking_hole(2);
+               locking_hole(0);
+               locking_hole(1);
+               locking_hole(2);
 
 
-          // the holes for the bearings (3x10x4) 
+               // the holes for the bearings (3x10x4) 
 
-          arm_hole(0);
-          arm_hole(1);
+               arm_hole(0);
+               arm_hole(1);
 
                
-     }
+          }
 
      
-     arm_regular(0);
-     arm_regular(1);
-
     
 
+    
+     }
    
 }
 
 module arm_regular(pos, hasTeeths = false) {
      rotate([0, 0, 90 + pos * 180]) {
-          translate([ GripperRadius - 7, 0, 10 ]) {
+          translate([ distance, 0, 10 ]) {
                rotate([0, 0, 0]) {
                     arm(0.0, hasTeeths) ;
                }
@@ -157,21 +156,34 @@ module arm_regular(pos, hasTeeths = false) {
 
 module arm_hole(pos) {
      rotate([0, 0, 90 + pos * 180]) {
-          translate([ GripperRadius - 7, 0, 10 ]) {
+          translate([ distance, 0, 10 ]) {
                rotate([0, -90, 0]) {
-                    // arm(ArmTolerance) ;
                     color("pink") {
                          arm_shape(ArmTolerance) ;
                     }
                }
                translate([0, 30 - pos * 60, 0]) {
                     rotate([90, 0, 180 + pos * 180]) {
-                         hole_through(name="M3", l=38, cl=0.1, h=10, hcl=0.4);
+                         hole_through(name="M3", l=33, cl=0.1, h=15, hcl=0.4);
                     }
                }
           }
      }
 }
+
+module arm_hole_driver(pos) {
+     rotate([0, 0, 90 + pos * 180]) {
+          translate([ distance, 0, length/2 + NemaHeight + DriverPadding ]) {
+               translate([0, 30 - pos * 60, 0]) {
+                    rotate([90, 0, 180 + pos * 180]) {
+                         hole_through(name="M3", l=33, cl=0.1, h=15, hcl=0.4);
+                    }
+               }
+          }
+     }
+}
+
+
 
 ArmDepth=4; 
 ArmWidth=10;
@@ -210,23 +222,15 @@ module arm(tolerance, hasTeeths = false) {
 module arm_shape(tolerance) {
      translate([ArmLength/2 + 3/4*ArmWidth - 2*tolerance , 0, 0]) {
           cube([ArmLength + 4*( 3/4 * ArmWidth + tolerance), ArmDepth + tolerance, 2* (3/4 * ArmWidth + tolerance)], center=true);
+          translate([length, 0, 0])
+               cube([length+2*tolerance + 8, ArmDepth+tolerance, length], center=true);
      } 
 }
 
-//arm();
-
-nema();
 
 
-translate([0, 0, -AttachmentHeight]) {
-     attachment();
-  }
 
 
-nema();
-
-
-//gripper();
 
 
 
@@ -303,40 +307,168 @@ module driver() {
 
 
 
-// this are the gears 
-translate([0, 0, NemaHeight + DriverPadding ]) {
-     driver();    
-}
-
-
 
 module arm_with_driver(rotation) {
-
-rotate([0, 0, rotation]) {
-     difference() {
-          arm_gear(rotation);
-          translate([0, -distance, 0]) {
-               rotate([0, 90, 0]) {
-                    cylinder(ArmDepth, BearingDiameter/2 , BearingDiameter/2, center=true);
+     rotate([0, 0, rotation]) {
+          difference() {
+               arm_gear(rotation);
+               translate([0, -distance, 0]) {
+                    rotate([0, 90, 0]) {
+                         cylinder(ArmDepth, BearingDiameter/2 , BearingDiameter/2, center=true);
+                    }
                }
           }
-     }
-     translate([0, -distance, 0]) {
-          rotate([0, 0, -90]) {
-               arm(0.0, true);
+          translate([0, -distance, 0]) {
+               rotate([0, 0, -90]) {
+                    arm(0.0, true);
+               }
           }
-     }
      }
 }
 
 DriverPadding = 4;
-translate([0, 0, length/2 + NemaHeight + DriverPadding]) {
-     arm_with_driver(0);
-}
 
+module top_arms() {
+     translate([0, 0, length/2 + NemaHeight + DriverPadding]) {
+          arm_with_driver(0);
+     }
+     
      translate([0, 0, length/2 + NemaHeight + DriverPadding]) {
           arm_with_driver(180);
      }
+     
+     
+}
+
+module bottom_arms() {
+     translate([0, 0, -AttachmentHeight]) {
+          arm_regular(0);
+          arm_regular(1);
+     }
+}
 
 
 
+// this are the gears
+module driver_gear() {
+     translate([0, 0, NemaHeight + DriverPadding ]) {
+          driver();    
+     }
+}
+
+
+attachment();
+
+bottom_arms();
+top_arms();
+driver_gear(); 
+body();
+
+rotate([0, 0, 180])
+lateral_arm(1);
+lateral_arm(0);
+
+
+LateralArmLength=130;
+
+LateralArmLength2=40;
+ArmArtAngle=45;
+module lateral_arm(screwpos) {
+
+     
+
+     module holes(pos) {
+          rotate([0, 0, pos * 180]) {
+          translate([ -2*ArmDepth - ArmTolerance  , 0, 0]) {
+               rotate([0, -90, 0]) {
+                    color("green") {
+                         hole_through(name="M3", l=14, cl=0.1, h=2, hcl=0.4);
+                    }
+               }
+          }
+          
+          translate([ ArmDepth +  ArmTolerance  , 0, 0]) {
+               rotate([0, -90,0]) {
+                    color("green") {
+                         nutcatch_parallel("M3", l=4);
+                    }
+               }
+          }
+          }
+     }
+
+     module temple(pos) {
+          translate([pos * (ArmDepth + ArmTolerance), 0, 0]) {
+               translate([0, 0, LateralArmLength/2])
+                    cube([ ArmDepth, ArmWidth, LateralArmLength], center=true);
+               
+               translate([0, 0, 0]) {
+                    rotate([0, 90, 0])
+                         cylinder(ArmDepth, 3/4 * ArmWidth, 3/4 * ArmWidth, center=true);
+               }
+               
+               translate([0, 0, AttachmentHeight - 10 + length/2 + NemaHeight + DriverPadding]) {
+                    rotate([0, 90, 0])
+                         cylinder(ArmDepth, 3/4 * ArmWidth, 3/4 * ArmWidth, center=true);
+               }
+
+               translate([0, 0, LateralArmLength]) {
+                    rotate([0, 90, 0])
+                         cylinder(ArmDepth, ArmWidth/2, ArmWidth/2, center=true);
+               }
+               translate([0, 0, LateralArmLength]) {
+                    rotate([ArmArtAngle, 0, 0]) {
+                         translate([0, 0, LateralArmLength2/2]) {
+                              color("red") {
+                                   cube([ ArmDepth, ArmWidth, LateralArmLength2], center=true);
+                              }
+                         }
+                         translate([0, 0, LateralArmLength2]) {
+                              rotate([0, 90, 0]) cylinder(ArmDepth, ArmWidth/2, ArmWidth/2, center=true);
+                              rotate([-ArmArtAngle, 0, 0]) {
+                                   translate([-pos * (ArmDepth/2 + ArmTolerance) / 2, 0, LateralArmLength2/2]) {
+                                        color("blue") {
+                                             cube([ 1.5*ArmDepth + ArmTolerance, ArmWidth, LateralArmLength2], center=true);
+                                        }
+                                   }
+                                   translate([-pos * (ArmDepth/2 + ArmTolerance) / 2, 0, LateralArmLength2]) {
+                                        rotate([0, 90, 0]) cylinder(1.5*(ArmDepth + ArmTolerance), ArmWidth/2, ArmWidth/2, center=true);
+                                   }
+                              }
+                         }
+                    }
+               }
+          }
+     }
+ 
+     translate([0, distance + ArmLength + ArmWidth, - AttachmentHeight +10]) {
+          difference() {
+               union() {
+                    temple(1);
+                    temple(-1);
+               }
+        
+               holes();
+               translate([0, 0,  AttachmentHeight - 10 + length/2 + NemaHeight + DriverPadding ]) {
+                    holes(screwpos);
+               }
+               translate([0, 0,  AttachmentHeight - 10 + length/2 + NemaHeight + DriverPadding ]) {
+                    holes(screwpos);
+               }
+
+               translate([0, 0, LateralArmLength]) {
+                    rotate([ArmArtAngle, 0, 0]) {
+                         translate([0, 0, LateralArmLength2]) {
+                              holes(screwpos);
+                              rotate([-ArmArtAngle, 0, 0]) {
+                                   translate([0, 0, LateralArmLength2]) {
+                                        holes(screwpos);
+                                   }
+                              }
+                         }
+                    }
+               }
+          }
+     }
+     
+}
