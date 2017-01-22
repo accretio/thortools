@@ -185,10 +185,7 @@ module arm_hole_driver(pos) {
 
 
 
-ArmDepth=4; 
-ArmWidth=10;
-ArmLength=50;
-BearingDiameter=10; // 623ZZ bearings
+BearingDiameter=10.3; // 623ZZ bearings
 
 module arm(tolerance, hasTeeths = false) {
 
@@ -307,6 +304,8 @@ module driver() {
 
 
 
+ 
+ 
 
 module arm_with_driver(rotation) {
      rotate([0, 0, rotation]) {
@@ -357,43 +356,36 @@ module driver_gear() {
 }
 
 
-attachment();
 
-bottom_arms();
-top_arms();
-driver_gear(); 
-body();
-
-rotate([0, 0, 180])
-lateral_arm(1);
-lateral_arm(0);
-
+ArmDepth=4; 
+ArmWidth=10;
+ArmLength=40;
 
 LateralArmLength=130;
 
 LateralArmLength2=40;
-ArmArtAngle=45;
+ArmArtAngle=60;
 module lateral_arm(screwpos) {
 
      
 
      module holes(pos) {
           rotate([0, 0, pos * 180]) {
-          translate([ -2*ArmDepth - ArmTolerance  , 0, 0]) {
-               rotate([0, -90, 0]) {
-                    color("green") {
-                         hole_through(name="M3", l=14, cl=0.1, h=2, hcl=0.4);
+               translate([ -1.5*ArmDepth - ArmTolerance - 2 , 0, 0]) {
+                    rotate([0, -90, 0]) {
+                         color("green") {
+                              hole_through(name="M3", l=3*ArmDepth, cl=0.4, h=4, hcl=0.4);
+                         }
                     }
                }
-          }
           
-          translate([ ArmDepth +  ArmTolerance  , 0, 0]) {
-               rotate([0, -90,0]) {
-                    color("green") {
-                         nutcatch_parallel("M3", l=4);
+               translate([ 1.5*ArmDepth +  ArmTolerance  -2 , 0, 0]) {
+                    rotate([0, -90,0]) {
+                         color("green") {
+                              nutcatch_parallel("M3", l=8);
+                         }
                     }
                }
-          }
           }
      }
 
@@ -430,9 +422,13 @@ module lateral_arm(screwpos) {
                                         color("blue") {
                                              cube([ 1.5*ArmDepth + ArmTolerance, ArmWidth, LateralArmLength2], center=true);
                                         }
+                                        
                                    }
+                                   translate([-pos * (ArmDepth/2 + ArmTolerance) / 2, 0, 0])
+                                        rotate([0, 90, 0]) cylinder(1.5*ArmDepth + ArmTolerance, ArmWidth/2, ArmWidth/2, center=true);
+                                    
                                    translate([-pos * (ArmDepth/2 + ArmTolerance) / 2, 0, LateralArmLength2]) {
-                                        rotate([0, 90, 0]) cylinder(1.5*(ArmDepth + ArmTolerance), ArmWidth/2, ArmWidth/2, center=true);
+                                        rotate([0, 90, 0]) cylinder(1.5*ArmDepth + ArmTolerance, ArmWidth/2, ArmWidth/2, center=true);
                                    }
                               }
                          }
@@ -448,7 +444,7 @@ module lateral_arm(screwpos) {
                     temple(-1);
                }
         
-               holes();
+               holes(screwpos);
                translate([0, 0,  AttachmentHeight - 10 + length/2 + NemaHeight + DriverPadding ]) {
                     holes(screwpos);
                }
@@ -472,3 +468,19 @@ module lateral_arm(screwpos) {
      }
      
 }
+
+
+
+
+attachment();
+
+bottom_arms();
+top_arms();
+driver_gear();
+
+body();
+
+
+rotate([0, 0, 180])
+lateral_arm(1);
+lateral_arm(0);
