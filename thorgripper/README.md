@@ -1,4 +1,4 @@
-![Loader](gripper.png)
+![Loader](gripper_made.png)
 
 # Gripper
 
