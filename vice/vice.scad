@@ -62,19 +62,19 @@ module positionned_rod(clearance=0.0, l=length) {
      difference() {
           union() {
                rod(clearance, l);
-               cylinder(10, 10, 10);
+               cylinder(20, 10, 10);
           }
     
           color("blue") 
-               cylinder(10, 5/2 + tol , 5/2 + tol, $fn=10);
+               cylinder(30, 5/2 + tol , 5/2 + tol, $fn=10);
           
      
-     translate([7, 0, 5]) {
+     translate([7, 0, 10]) {
           rotate([0, 90, 0])
                nutcatch_sidecut("M3", l=100, clk=0.4, clh=0.4, clsl=0.4);
           translate([4, 0, 0])
                rotate([0, 90, 0])
-               hole_through(name="M3", l=15, cl=0.1, h=5, hcl=0.4);
+               hole_through(name="M3", l=15, cl=0.1, h=0, hcl=0.4);
           
      }
      }

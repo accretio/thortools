@@ -29,7 +29,7 @@ module nema() {
 module body() {
      module m3_hole(x, y) {
           color("red") {
-               translate([x*31/2, y*31/2, NemaHeight + NemaCoverHeight +  length/2 + BearingDiameter]) hole_through(name="M3", l=(10 + length/2 + BearingDiameter), cl=0.1, h=2, hcl=0.4);
+               translate([x*31/2, y*31/2, NemaHeight + NemaCoverHeight +  length/2 + BearingDiameter]) hole_through(name="M3", l=(10 + length/2 + BearingDiameter), cl=0.2, h=2, hcl=0.4);
           }
      }
      difference() {
@@ -64,16 +64,21 @@ module body() {
           // the holes for the arms with drivers
           arm_hole_driver(0);
           arm_hole_driver(1);
-     }
 
+        
+     }
+     
    
+
+
+
 }
 
 
 AttachmentHeight=20;
 Arm6Radius=15.1;
 Arm6EndHeight=10;
-ArmTolerance=0.5; 
+ArmTolerance=0.3; 
 ArmLength2=40;
 // screws to the ase
 module attachment_hole(pos) {
@@ -81,11 +86,11 @@ module attachment_hole(pos) {
           translate([0.8 * GripperRadius , 0, 0]) {
                color("blue") {
                     rotate([180, 0, 0]) {
-                         hole_through(name="M3", l=50, cl=0.1, h=5, hcl=0.4);
+                         hole_through(name="M3", l=50, cl=0.2, h=5, hcl=0.4);
                     }
                     
                     translate([0, 0, 40]) {
-                         nutcatch_sidecut("M3", l=100, clk=0.1, clh=0.1, clsl=0.1);
+                         nutcatch_sidecut("M3", l=100, clk=0.2, clh=0.2, clsl=0.2);
                     }
                }
           }
@@ -100,7 +105,7 @@ module attachment() {
                translate([0, 0, 5]) {
                     translate([0, -GripperRadius, 0]) {
                          rotate([90, 0, 0]) {
-                              hole_through(name="M3", l=30, cl=0.1, h=4, hcl=0.4);
+                              hole_through(name="M3", l=30, cl=0.2, h=4, hcl=0.4);
                          }
                     }
                }
@@ -133,6 +138,10 @@ module attachment() {
                arm_hole(0);
                arm_hole(1);
 
+               // the hole for the other shaft of the damn stepper
+
+               cylinder(20, 10, 10);
+
                
           }
 
@@ -164,7 +173,7 @@ module arm_hole(pos) {
                }
                translate([0, 30 - pos * 60, 0]) {
                     rotate([90, 0, 180 + pos * 180]) {
-                         hole_through(name="M3", l=33, cl=0.1, h=15, hcl=0.4);
+                         hole_through(name="M3", l=33, cl=0.2, h=15, hcl=0.4);
                     }
                }
           }
@@ -176,7 +185,7 @@ module arm_hole_driver(pos) {
           translate([ distance, 0, length/2 + NemaHeight + DriverPadding ]) {
                translate([0, 30 - pos * 60, 0]) {
                     rotate([90, 0, 180 + pos * 180]) {
-                         hole_through(name="M3", l=33, cl=0.1, h=15, hcl=0.4);
+                         hole_through(name="M3", l=33, cl=0.2, h=15, hcl=0.4);
                     }
                }
           }
@@ -359,12 +368,12 @@ module driver_gear() {
 
 ArmDepth=4; 
 ArmWidth=10;
-ArmLength=40;
+ArmLength=30;
 
-LateralArmLength=130;
+LateralArmLength=100;
 
 LateralArmLength2=40;
-ArmArtAngle=60;
+ArmArtAngle=80;
 module lateral_arm(screwpos) {
 
      
@@ -470,17 +479,86 @@ module lateral_arm(screwpos) {
 }
 
 
+AttachmentHeight=10;
+
+module camera_attachment() {
+
+      
+      module m3_hole(x, y) {
+          color("red") {
+               translate([x*31/2, y*31/2, 5]) hole_through(name="M3", l=10, cl=0.2, h=2, hcl=0.4);
+          }
+     }
+          
+     translate([0, 0, NemaHeight + NemaCoverHeight + length/2 + BearingDiameter ]) {
+           difference() {
+               intersection() {
+                    difference() {
+                         translate([-25, 0, 0])
+                              cube([35, 50, AttachmentHeight], center=true);
+                         cylinder(10, NemaHoleRadius, NemaHoleRadius);
+                    }
+                    cylinder(10, GripperRadius, GripperRadius);
+               }
+               
+               translate([-25, 0, AttachmentHeight/2])
+                    rotate([90, 0, 0])
+               {
+                    cylinder(8, 5, 5, center=true);
+                    // the screw for the camera
+                    translate([0, 0, 30])
+                         hole_through(name="M3", l=55, cl=0.4, h=10, hcl=0.7);
+                    
+               }
+               m3_hole(-1, 1);
+               m3_hole(-1, -1);
+                  translate([-25, 15, AttachmentHeight/2])
+                  rotate([90, 0, 0])
+            nutcatch_parallel("M3", l=2);
+         
+               
+          }
+          
+     
+          translate([-25, 0, AttachmentHeight/2])
+               rotate([90, 0, 0])
+          {
+               difference() {
+                    union() {
+                         translate([0, 0, 8])
+                              cylinder(5, 3, 3, center=true);
+                         translate([0, 0, -8])
+                              cylinder(5, 3, 3, center=true);
+                    }
+                    translate([0, 0, 30])
+                         hole_through(name="M3", l=55, cld=1.0, h=10, hcl=2.0);
+                    
+               }
+                
+   
+          } 
+
+     }
+}
+
+/*
+  attachment(); 
+
+  bottom_arms();
+  top_arms();
+  driver_gear();
+
+*/
+
+//body();
+
+/*
+  rotate([0, 0, 180])
+  lateral_arm(1);
+
+  lateral_arm(0);
+
+*/
 
 
-attachment();
-
-bottom_arms();
-top_arms();
-driver_gear();
-
-body();
-
-
-rotate([0, 0, 180])
-lateral_arm(1);
-lateral_arm(0);
+camera_attachment();
